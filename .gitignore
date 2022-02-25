@@ -1,32 +1,3 @@
-Skip to content
-Search or jump to…
-Pull requests
-Issues
-Marketplace
-Explore
- 
-@BrunoVollin 
-BrunoVollin
-/
-MongoDB
-Public
-Code
-Issues
-Pull requests
-Actions
-Projects
-Wiki
-Security
-Insights
-Settings
-MongoDB/.gitignore
-@BrunoVollin
-BrunoVollin update writeAJson function
-Latest commit 6a3b028 on 3 Jan
- History
- 1 contributor
-53 lines (44 sloc)  547 Bytes
-   
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -80,16 +51,3 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
-© 2022 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Docs
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
-Loading complete
