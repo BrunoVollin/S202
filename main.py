@@ -1,9 +1,6 @@
 from db.database import Database
 from helper.WriteAJson import writeAJson
 
-db = Database()
+db = Database(database="pokedex", collection="pokemons")
+db.resetDatabase()
 
-tipos = ["Grass", "Poison"]
-pokemons = db.executeQuery({ "type": {"$in": tipos}, "next_evolution": {"$exists": True} })
-
-writeAJson(data=pokemons, name="Pokemons")
