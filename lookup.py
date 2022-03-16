@@ -4,14 +4,14 @@ from dataset.pessoa_dataset import dataset as pessoa_dataset
 from dataset.carro_dataset import dataset as carro_dataset
 
 pessoas = Database(
-    database="consesionaria",
+    database="database",
     collection="pessoas",
     dataset=pessoa_dataset
 )
 pessoas.resetDatabase()
 
 carros = Database(
-    database="consesionaria",
+    database="database",
     collection="carros",
     dataset=carro_dataset
 )
@@ -30,12 +30,3 @@ result1 = carros.collection.aggregate([
 
 writeAJson(result1, "result1")
 
-result4 = db.collection.aggregate([
-    {"$project": {
-        "_id": 0,
-        "cliente": 1,
-        "desconto": {
-            "$cond": {"if": {"$gte": ["$total", 10]}, "then": 0.1, "else": 0.05}
-        }
-    }}
-])
