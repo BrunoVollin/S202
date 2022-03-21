@@ -2,7 +2,7 @@ import pymongo
 
 
 class Database:
-    def __init__(self, database, collection, dataset):
+    def __init__(self, database, collection, dataset=None):
         connectionString = "mongodb+srv://root:root@cluster0.wwahw.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
         self.clusterConnection = pymongo.MongoClient(
             connectionString,
@@ -11,7 +11,8 @@ class Database:
         )
         self.db = self.clusterConnection[database]
         self.collection = self.db[collection]
-        self.dataset = dataset
+        if dataset:
+            self.dataset = dataset
 
     def resetDatabase(self):
         self.db.drop_collection(self.collection)
@@ -28,10 +29,9 @@ class Database:
             {"nome": nome},
             {
                 "$set": {"idade": idade},
-                "$currentDate": { "lastModified": True }
+                "$currentDate": {"lastModified": True}
             }
         )
 
     def delete(self, nome):
         return self.collection.delete_one({"nome": nome})
-
