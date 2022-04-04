@@ -1,37 +1,45 @@
-import pymongo
+from neo4j import GraphDatabase
+from neo4j.exceptions import ServiceUnavailable
+import logging
 
 
-class Database:
-    def __init__(self, database, collection, dataset=None):
-        connectionString = "mongodb+srv://root:root@cluster0.wwahw.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
-        self.clusterConnection = pymongo.MongoClient(
-            connectionString,
-            # CASO OCORRA O ERRO [SSL_INVALID_CERTIFICATE]
-            tlsAllowInvalidCertificates=True
-        )
-        self.db = self.clusterConnection[database]
-        self.collection = self.db[collection]
-        if dataset:
-            self.dataset = dataset
+class Graph:
+    def __init__(self, uri, user, password):
+        self.driver = GraphDatabase.driver(uri, auth=(user, password))
 
-    def resetDatabase(self):
-        self.db.drop_collection(self.collection)
-        self.collection.insert_many(self.dataset)
+    def close(self):
+        self.driver.close()
 
-    def create(self, nome, idade):
-        return self.collection.insert_one({"nome": nome, "idade": idade})
+    def execute_query(self, query, parameters=None):
+        data = []
+        with self.driver.session() as session:
+            results = session.run(query, parameters)
+            for record in results:
+                data.append(record)
+            return data
 
-    def read(self):
-        return self.collection.find({})
+    @staticmethod
+    def _execute(tx, query):
+        try:
+            data = []
+            result = tx.run(query)
+            for record in result:
+                data.append(record)
 
-    def update(self, nome, idade):
-        return self.collection.update_one(
-            {"nome": nome},
-            {
-                "$set": {"idade": idade},
-                "$currentDate": {"lastModified": True}
-            }
-        )
+        except ServiceUnavailable as exception:
+            logging.error(f"{query} gerou um erro: \n {exception}")
+            raise
 
-    def delete(self, nome):
-        return self.collection.delete_one({"nome": nome})
+        return data
+
+    def read(self, query):
+        with self.driver.session() as session:
+            result = session.read_transaction(self._execute, query)
+            return result
+
+    def write(self, query):
+        with self.driver.session() as session:
+            result = session.write_transaction(self._execute, query)
+            return result
+
+
