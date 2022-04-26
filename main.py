@@ -1,16 +1,35 @@
 from helper.write_a_json import write_a_json
 from db.database import Graph
 
+db = Graph(uri='bolt://35.172.240.205:7687', user='neo4j', password='humps-child-needle')
 
-db = Graph("bolt://3.89.131.153:7687", "neo4j", "curls-magnetos-developments")
+# Create Entity's
+db.execute_query('CREATE (n:Person {name:"John", age:30})')
+db.execute_query('CREATE (n:Person {name:"Mary", age:25})')
+db.execute_query('CREATE (n:Person {name:"Peter", age:35})')
 
-data = db.execute_query("match (n) return n")
-write_a_json(data, "all_data")
+# Create Relation's
+db.execute_query('MATCH (n:Person) WHERE n.name = "John" CREATE (n)-[:KNOWS]->(m:Person {name:"Mary", age:25})')
+db.execute_query('MATCH (n:Person) WHERE n.name = "John" CREATE (n)-[:KNOWS]->(m:Person {name:"Peter", age:35})')
 
+# Read Entity's
+aux = db.execute_query('MATCH (n) RETURN n')
+write_a_json(aux, 'read')
 
-data = db.execute_query("create (n:Person {name: 'John'}) return n")
-write_a_json(data, "all_data")
+# Read Relation's
+aux = db.execute_query('MATCH (n)-[r]->(m) RETURN n, r, m')
+write_a_json(aux, 'read')
 
+# Update Entity's
+db.execute_query('MATCH (n:Person {name:"John"}) SET n.age = 31')
 
+# Update Relation's
+db.execute_query('MATCH (n:Person {name:"John"})-[r]->(m:Person {name:"Mary"}) SET r.since = "2018-01-01"')
+
+# Delete Entity's
+db.execute_query('MATCH (n:Person {name:"Peter"}) DELETE n')
+
+# Delete Relation's
+db.execute_query('MATCH (n:Person {name:"John"})-[r]->(m:Person {name:"Peter"}) DELETE r')
 
 
