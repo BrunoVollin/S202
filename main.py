@@ -1,35 +1,55 @@
 from helper.write_a_json import write_a_json
 from db.database import Graph
 
-db = Graph(uri='bolt://35.172.240.205:7687', user='neo4j', password='humps-child-needle')
 
-# Create Entity's
-db.execute_query('CREATE (n:Person {name:"John", age:30})')
-db.execute_query('CREATE (n:Person {name:"Mary", age:25})')
-db.execute_query('CREATE (n:Person {name:"Peter", age:35})')
+class PersonCRUD(object):
+    def __init__(self):
+        self.db = Graph(uri='bolt://44.203.219.42:7687',
+                        user='neo4j', password='masses-streets-debt')
 
-# Create Relation's
-db.execute_query('MATCH (n:Person) WHERE n.name = "John" CREATE (n)-[:KNOWS]->(m:Person {name:"Mary", age:25})')
-db.execute_query('MATCH (n:Person) WHERE n.name = "John" CREATE (n)-[:KNOWS]->(m:Person {name:"Peter", age:35})')
+    def create(self, person):
+        return self.db.execute_query('CREATE (n:Person {name:$name, age:$age}) return n',
+                                {'name': person['name'], 'age':person['age']})
 
-# Read Entity's
-aux = db.execute_query('MATCH (n) RETURN n')
-write_a_json(aux, 'read')
+    def read_by_name(self, person):
+        return self.db.execute_query('MATCH (n:Person {name:$name}) RETURN n',
+                                {'name': person['name']})
 
-# Read Relation's
-aux = db.execute_query('MATCH (n)-[r]->(m) RETURN n, r, m')
-write_a_json(aux, 'read')
+    def update_age(self, person):
+        return self.db.execute_query('MATCH (n:Person {name:$name}) SET n.age = $age RETURN n',
+                                {'name': person['name'], 'age':person['age']})
 
-# Update Entity's
-db.execute_query('MATCH (n:Person {name:"John"}) SET n.age = 31')
+    def delete(self, person):
+        return self.db.execute_query('MATCH (n:Person {name:$name}) DELETE n',
+                                {'name': person['name']})
 
-# Update Relation's
-db.execute_query('MATCH (n:Person {name:"John"})-[r]->(m:Person {name:"Mary"}) SET r.since = "2018-01-01"')
-
-# Delete Entity's
-db.execute_query('MATCH (n:Person {name:"Peter"}) DELETE n')
-
-# Delete Relation's
-db.execute_query('MATCH (n:Person {name:"John"})-[r]->(m:Person {name:"Peter"}) DELETE r')
+    def delete_all_nodes(self):
+        return self.db.execute_query('MATCH (n) DETACH DELETE n')
 
 
+    def create_relation(self, person1, person2, year):
+        return self.db.execute_query('MATCH (n:Person {name:$name1}), (m:Person {name:$name2}) CREATE (n)-[r:KNOWS{year: $year}]->(m) RETURN n, r, m',
+                                {'name1':person1['name'], 'name2': person2['name'], 'year': year})
+
+    def read_relation(self, person1, person2):
+        return self.db.execute_query('MATCH (n:Person {name:$name1})-[r]->(m:Person {name:$name2}) RETURN n, r, m',
+                                {'name1':person1['name'], 'name2': person2['name']})
+
+
+john = {
+    'name': 'John',
+    'age': 30
+}
+
+amanda = {
+    'name': 'Amanda',
+    'age': 27
+}
+
+db = PersonCRUD()
+
+db.delete_all_nodes()
+aux = db.create(amanda)
+aux = db.create(john)
+aux = db.create_relation(john, amanda, 2018)
+write_a_json(aux, "zxasxs")
