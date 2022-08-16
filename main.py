@@ -1,7 +1,7 @@
-from db.database import Database
+from db.pokedex import Pokedex
 from helper.WriteAJson import writeAJson
 
-db = Database(database="pokedex", collection="pokemons")
-db.resetDatabase()
+pokedex = Pokedex()
 
-print("Bom dia")
+
+
