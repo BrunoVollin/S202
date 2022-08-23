@@ -3,7 +3,7 @@ import pymongo
 
 class Database:
     def __init__(self, database, collection, dataset):
-        connectionString = "mongodb+srv://root:root@cluster0.j35qa.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+        connectionString = "localhost:27017"
         self.clusterConnection = pymongo.MongoClient(
             connectionString,
             tlsAllowInvalidCertificates=True # CASO OCORRA O ERRO [SSL_INVALID_CERTIFICATE]
