@@ -1,7 +1,7 @@
 from db.database import Database
 from helper.WriteAJson import writeAJson
 from dataset.pessoa_dataset import dataset as pessoa_dataset
-from dataset.carro_dataset import dataset as carro_dataset
+from dataset.produto_database import dataset as produto_dataset
 
 pessoas = Database(
     database="database",
@@ -10,22 +10,33 @@ pessoas = Database(
 )
 pessoas.resetDatabase()
 
-carros = Database(
+produtos = Database(
     database="database",
-    collection="carros",
-    dataset=carro_dataset
+    collection="produtos",
+    dataset=produto_dataset
 )
-carros.resetDatabase()
+produtos.resetDatabase()
 
-result1 = carros.collection.aggregate([
+result1 = produtos.collection.aggregate([
     {"$lookup":
         {
             "from": "pessoas",  # outra colecao
-            "localField": "dono_id",  # chave estrangeira
+            "localField": "cliente_id",  # chave estrangeira
             "foreignField": "_id",  # id da outra colecao
-            "as": "dono"  # nome da saida
+            "as": "cliente"  # nome da saida
         }
-     }
+     },
+    {"$group": {"_id": "$cliente", "total": {"$sum": "$total"} } },
+    {"$sort": {"total": -1} },
+    {"$unwind": '$_id'},
+    {"$project": {
+        "_id": 0,
+        "nome": "$_id.nome",
+        "total": 1,
+        "desconto": {
+            "$cond": {"if": {"$gte": ["$total", 10]}, "then": "true", "else": "false"}
+        }
+    }}
 ])
 
 writeAJson(result1, "result1")
